@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI News & Tools Aggregator</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #1a202c;
+      --text-muted: #718096;
+      --accent: #4f46e5;
+      --accent-light: #e0e7ff;
+      --badge-modelos: #7c3aed;
+      --badge-herramientas: #0891b2;
+      --badge-investigacion: #059669;
+      --badge-industria: #d97706;
+      --badge-normativa: #dc2626;
+      --badge-tutoriales: #db2777;
+      --badge-default: #64748b;
+      --score-high: #059669;
+      --score-mid: #d97706;
+      --score-low: #dc2626;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,.12);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #818cf8;
+      --accent-light: #1e1b4b;
+      --shadow: 0 1px 3px rgba(0,0,0,.3);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.6; transition: background .2s, color .2s; }
+
+    /* HEADER */
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+    .header-title { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .header-title span { color: var(--text-muted); font-weight: 400; font-size: .85rem; margin-left: .5rem; }
+    .header-actions { display: flex; gap: .5rem; }
+    button { cursor: pointer; border: none; border-radius: 6px; padding: .4rem .8rem; font-size: .85rem; font-weight: 500; transition: opacity .15s, background .15s; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-secondary:hover { opacity: .8; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: .85; }
+
+    /* CONTROLS */
+    .controls { max-width: 1200px; margin: 1.25rem auto; padding: 0 1rem; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+    .search-wrap { flex: 1; min-width: 200px; position: relative; }
+    .search-wrap input { width: 100%; padding: .5rem .75rem .5rem 2.25rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: .9rem; outline: none; transition: border-color .2s; }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-icon { position: absolute; left: .65rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem; pointer-events: none; }
+    select { padding: .45rem .75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: .85rem; cursor: pointer; outline: none; }
+    select:focus { border-color: var(--accent); }
+    .sort-label { font-size: .85rem; color: var(--text-muted); white-space: nowrap; }
+
+    /* STATS BAR */
+    .stats-bar { max-width: 1200px; margin: 0 auto .75rem; padding: 0 1rem; font-size: .82rem; color: var(--text-muted); }
+
+    /* GRID */
+    .grid { max-width: 1200px; margin: 0 auto 2rem; padding: 0 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; }
+
+    /* CARD */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; box-shadow: var(--shadow); transition: box-shadow .2s, transform .15s; display: flex; flex-direction: column; gap: .5rem; }
+    .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; }
+    .card-badges { display: flex; gap: .35rem; flex-wrap: wrap; }
+    .badge { display: inline-block; font-size: .72rem; font-weight: 600; padding: .15rem .5rem; border-radius: 4px; text-transform: uppercase; letter-spacing: .03em; color: #fff; }
+    .badge-Modelos      { background: var(--badge-modelos); }
+    .badge-Herramientas { background: var(--badge-herramientas); }
+    .badge-Investigacion{ background: var(--badge-investigacion); }
+    .badge-Industria    { background: var(--badge-industria); }
+    .badge-Normativa    { background: var(--badge-normativa); }
+    .badge-Tutoriales   { background: var(--badge-tutoriales); }
+    .badge-default      { background: var(--badge-default); }
+    .badge-lang { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .badge-tipo { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .score { font-size: .85rem; font-weight: 700; min-width: 2rem; text-align: right; }
+    .score-high { color: var(--score-high); }
+    .score-mid  { color: var(--score-mid); }
+    .score-low  { color: var(--score-low); }
+    .card-title { font-size: .95rem; font-weight: 600; line-height: 1.4; }
+    .card-title a { color: var(--text); text-decoration: none; }
+    .card-title a:hover { color: var(--accent); }
+    .card-summary { font-size: .85rem; color: var(--text-muted); line-height: 1.5; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: .3rem; }
+    .tag { font-size: .72rem; background: var(--accent-light); color: var(--accent); padding: .1rem .45rem; border-radius: 4px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; color: var(--text-muted); margin-top: auto; padding-top: .25rem; border-top: 1px solid var(--border); }
+    .card-footer a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .card-footer a:hover { text-decoration: underline; }
+
+    /* PAGINATION */
+    .pagination { max-width: 1200px; margin: 0 auto 2rem; padding: 0 1rem; display: flex; justify-content: center; align-items: center; gap: .5rem; }
+    .page-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: .4rem .7rem; font-size: .85rem; border-radius: 6px; }
+    .page-btn:hover:not(:disabled) { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+    .page-btn:disabled { opacity: .4; cursor: default; }
+    .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .page-info { font-size: .85rem; color: var(--text-muted); }
+
+    /* EMPTY / LOADING */
+    .state-msg { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: .95rem; }
+    .spinner { display: inline-block; width: 1.5rem; height: 1.5rem; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: .75rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 1.5rem; font-size: .8rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+
+    @media (max-width: 600px) {
+      .header-title span { display: none; }
+      .controls { flex-direction: column; }
+      .search-wrap { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    AI News &amp; Tools
+    <span>Aggregator v2.0 — actualizado cada 6h</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn-secondary" id="btnRefresh">&#8635; Actualizar</button>
+    <button class="btn-secondary" id="btnTheme">&#9788;</button>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" id="searchInput" placeholder="Buscar por título, resumen o tags..." />
+  </div>
+  <select id="filterCategoria">
+    <option value="">Todas las categorías</option>
+    <option>Modelos</option>
+    <option>Herramientas</option>
+    <option>Investigacion</option>
+    <option>Industria</option>
+    <option>Normativa</option>
+    <option>Tutoriales</option>
+  </select>
+  <select id="filterIdioma">
+    <option value="">Todos los idiomas</option>
+    <option value="EN">English</option>
+    <option value="ES">Español</option>
+  </select>
+  <select id="filterTipo">
+    <option value="">Todos los tipos</option>
+    <option value="noticia">Noticias</option>
+    <option value="herramienta">Herramientas</option>
+  </select>
+  <select id="sortBy">
+    <option value="relevancia">Ordenar: Relevancia</option>
+    <option value="fecha">Ordenar: Más reciente</option>
+  </select>
+</div>
+
+<div class="stats-bar" id="statsBar"></div>
+<div class="grid" id="grid"></div>
+<div class="pagination" id="pagination"></div>
+<footer>AI News &amp; Tools Aggregator v2.0 &mdash; datos vía Google Sheets &mdash; actualización automática cada 6h</footer>
+
+<script>
+  // ── CONFIG ────────────────────────────────────────────────────────────────
+  // Replace SHEET_ID with your actual Google Sheets ID.
+  // The sheet must be publicly readable ("Anyone with the link can view").
+  const SHEET_ID = "YOUR_SHEET_ID_HERE";
+  const SHEET_NAME = "AI_Feed";
+  const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+  const PAGE_SIZE = 20;
+
+  // ── STATE ─────────────────────────────────────────────────────────────────
+  let allItems = [];
+  let filtered = [];
+  let currentPage = 1;
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  applyTheme(localStorage.getItem("theme") || "light");
+  loadData();
+
+  // ── DATA ──────────────────────────────────────────────────────────────────
+  async function loadData() {
+    showLoading();
+    try {
+      const res = await fetch(API_URL + "?t=" + Date.now());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const rows = await res.json();
+      allItems = rows.map(normalizeRow).filter(r => r.nombre);
+      applyFiltersAndRender();
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  function normalizeRow(r) {
+    return {
+      fecha:      r.fecha || "",
+      tipo:       (r.tipo || "noticia").toLowerCase(),
+      categoria:  r.categoria || "Industria",
+      relevancia: parseInt(r.relevancia, 10) || 5,
+      nombre:     r.nombre || "",
+      link:       r.link || "#",
+      precio:     r.precio || "",
+      resumen:    r.resumen || "",
+      tags:       r.tags ? r.tags.split(",").map(t => t.trim()).filter(Boolean) : [],
+      fuente:     r.fuente || "",
+      idioma:     (r.idioma || "EN").toUpperCase(),
+    };
+  }
+
+  // ── FILTERS & SORT ────────────────────────────────────────────────────────
+  function applyFiltersAndRender() {
+    const q         = document.getElementById("searchInput").value.toLowerCase();
+    const categoria = document.getElementById("filterCategoria").value;
+    const idioma    = document.getElementById("filterIdioma").value;
+    const tipo      = document.getElementById("filterTipo").value;
+    const sortBy    = document.getElementById("sortBy").value;
+
+    filtered = allItems.filter(item => {
+      if (categoria && item.categoria !== categoria) return false;
+      if (idioma    && item.idioma    !== idioma)    return false;
+      if (tipo      && item.tipo      !== tipo)      return false;
+      if (q) {
+        const hay = `${item.nombre} ${item.resumen} ${item.tags.join(" ")}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    if (sortBy === "relevancia") {
+      filtered.sort((a, b) => b.relevancia - a.relevancia || new Date(b.fecha) - new Date(a.fecha));
+    } else {
+      filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    }
+
+    currentPage = 1;
+    renderPage();
+    renderPagination();
+    renderStats();
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  function renderPage() {
+    const grid = document.getElementById("grid");
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page  = filtered.slice(start, start + PAGE_SIZE);
+
+    if (!page.length) {
+      grid.innerHTML = '<div class="state-msg">No se encontraron resultados.</div>';
+      return;
+    }
+
+    grid.innerHTML = page.map(cardHTML).join("");
+  }
+
+  function cardHTML(item) {
+    const scoreClass = item.relevancia >= 8 ? "score-high" : item.relevancia >= 5 ? "score-mid" : "score-low";
+    const badgeClass = `badge-${item.categoria.replace(/\s+/g, "")}`;
+    const tagsHTML   = item.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("");
+    const precioHTML = item.precio && item.precio !== "Noticia"
+      ? `<span title="Precio">${esc(item.precio)}</span>` : "";
+    const dateStr = item.fecha ? item.fecha.slice(0, 10) : "";
+
+    return `
+      <div class="card">
+        <div class="card-top">
+          <div class="card-badges">
+            <span class="badge ${badgeClass}">${esc(item.categoria)}</span>
+            <span class="badge badge-lang">${esc(item.idioma)}</span>
+            <span class="badge badge-tipo">${esc(item.tipo)}</span>
+          </div>
+          <span class="score ${scoreClass}" title="Relevancia ${item.relevancia}/10">${item.relevancia}/10</span>
+        </div>
+        <div class="card-title"><a href="${esc(item.link)}" target="_blank" rel="noopener noreferrer">${esc(item.nombre)}</a></div>
+        <div class="card-summary">${esc(item.resumen)}</div>
+        ${tagsHTML ? `<div class="card-tags">${tagsHTML}</div>` : ""}
+        <div class="card-footer">
+          <span>${esc(item.fuente)}${dateStr ? " · " + dateStr : ""}${precioHTML ? " · " + precioHTML : ""}</span>
+          <a href="${esc(item.link)}" target="_blank" rel="noopener noreferrer">Ver &rarr;</a>
+        </div>
+      </div>`;
+  }
+
+  function renderPagination() {
+    const total = Math.ceil(filtered.length / PAGE_SIZE);
+    const pag   = document.getElementById("pagination");
+    if (total <= 1) { pag.innerHTML = ""; return; }
+
+    let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?"disabled":""}>&#8592;</button>`;
+
+    const range = pageRange(currentPage, total);
+    range.forEach(p => {
+      if (p === "…") {
+        html += `<span class="page-info">…</span>`;
+      } else {
+        html += `<button class="page-btn ${p===currentPage?"active":""}" onclick="goPage(${p})">${p}</button>`;
+      }
+    });
+
+    html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?"disabled":""}>&#8594;</button>`;
+    pag.innerHTML = html;
+  }
+
+  function pageRange(cur, total) {
+    if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
+    const pages = [1];
+    if (cur > 3) pages.push("…");
+    for (let p = Math.max(2, cur-1); p <= Math.min(total-1, cur+1); p++) pages.push(p);
+    if (cur < total - 2) pages.push("…");
+    pages.push(total);
+    return pages;
+  }
+
+  function renderStats() {
+    const el = document.getElementById("statsBar");
+    el.textContent = filtered.length
+      ? `Mostrando ${filtered.length} resultado${filtered.length !== 1 ? "s" : ""} de ${allItems.length} total`
+      : `${allItems.length} items cargados`;
+  }
+
+  function goPage(n) {
+    const total = Math.ceil(filtered.length / PAGE_SIZE);
+    if (n < 1 || n > total) return;
+    currentPage = n;
+    renderPage();
+    renderPagination();
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  // ── THEME ─────────────────────────────────────────────────────────────────
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.getElementById("btnTheme").textContent = t === "dark" ? "☀" : "☾";
+  }
+
+  document.getElementById("btnTheme").addEventListener("click", () => {
+    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    localStorage.setItem("theme", next);
+    applyTheme(next);
+  });
+
+  // ── EVENTS ────────────────────────────────────────────────────────────────
+  document.getElementById("btnRefresh").addEventListener("click", loadData);
+
+  ["searchInput","filterCategoria","filterIdioma","filterTipo","sortBy"].forEach(id => {
+    document.getElementById(id).addEventListener("input", applyFiltersAndRender);
+    document.getElementById(id).addEventListener("change", applyFiltersAndRender);
+  });
+
+  // Debounce search input
+  let searchTimer;
+  document.getElementById("searchInput").addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(applyFiltersAndRender, 250);
+  });
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s || "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+
+  function showLoading() {
+    document.getElementById("grid").innerHTML =
+      '<div class="state-msg"><div class="spinner"></div><br>Cargando datos…</div>';
+    document.getElementById("pagination").innerHTML = "";
+    document.getElementById("statsBar").textContent = "";
+  }
+
+  function showError(msg) {
+    document.getElementById("grid").innerHTML =
+      `<div class="state-msg">Error al cargar los datos: ${esc(msg)}<br><br>
+       <button class="btn-primary" onclick="loadData()">Reintentar</button></div>`;
+  }
+</script>
+</body>
+</html>

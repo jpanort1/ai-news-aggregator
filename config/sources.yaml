@@ -1,0 +1,82 @@
+sources:
+  # --- ENGLISH ---
+  - name: "The Verge AI"
+    url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml"
+    type: "rss"
+    language: "EN"
+    default_type: "noticia"
+
+  - name: "TechCrunch AI"
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+    type: "rss"
+    language: "EN"
+    default_type: "noticia"
+
+  - name: "VentureBeat AI"
+    url: "https://venturebeat.com/category/ai/feed/"
+    type: "rss"
+    language: "EN"
+    default_type: "noticia"
+
+  - name: "Wired AI"
+    url: "https://www.wired.com/feed/tag/ai/latest/rss"
+    type: "rss"
+    language: "EN"
+    default_type: "noticia"
+
+  - name: "OpenAI Blog"
+    url: "https://openai.com/news/rss.xml"
+    type: "rss"
+    language: "EN"
+    default_type: "noticia"
+
+  - name: "MIT Technology Review"
+    url: "https://www.technologyreview.com/feed/"
+    type: "rss"
+    language: "EN"
+    default_type: "noticia"
+
+  - name: "Towards Data Science"
+    url: "https://towardsdatascience.com/feed"
+    type: "rss"
+    language: "EN"
+    default_type: "noticia"
+
+  - name: "ProductHunt"
+    url: "https://www.producthunt.com/feed"
+    type: "rss"
+    language: "EN"
+    default_type: "herramienta"
+
+  # --- SPANISH ---
+  - name: "Xataka IA"
+    url: "https://www.xataka.com/tag/inteligencia-artificial/feed"
+    type: "rss"
+    language: "ES"
+    default_type: "noticia"
+
+  - name: "El Pais Tecnologia"
+    url: "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada"
+    type: "rss"
+    language: "ES"
+    default_type: "noticia"
+
+  # --- HACKER NEWS (API) ---
+  - name: "Hacker News"
+    url: "https://hacker-news.firebaseio.com/v0/"
+    type: "hn_api"
+    language: "EN"
+    default_type: "noticia"
+    keywords:
+      - "AI"
+      - "LLM"
+      - "GPT"
+      - "Claude"
+      - "Gemini"
+      - "machine learning"
+      - "neural network"
+      - "artificial intelligence"
+      - "deep learning"
+      - "agent"
+      - "transformer"
+      - "diffusion"
