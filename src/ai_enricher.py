@@ -248,8 +248,8 @@ def enrich_all(items: List[EnrichedItem]) -> List[ProcessedItem]:
             ai_provider=result.provider,
         ))
 
-        # Small delay to respect Groq's 30 req/min limit
-        time.sleep(0.5)
+        # Groq free tier: 30 req/min → 2.5s between requests = 24 req/min (safe margin)
+        time.sleep(2.5)
 
     logger.info(
         "AI enrichment done: Groq=%d Gemini=%d Fallback=%d",
